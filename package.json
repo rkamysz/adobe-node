@@ -1,0 +1,40 @@
+{
+  "name": "adobe-node",
+  "version": "1.0.0",
+  "description": "Control Adobe applications - such as Photoshop, Animate, Illustrator, InDesign - from node. Run JavaScript to remotely - from the command line - create, modify or export document content. This module can be used to automate the workflow by creating an action chain that can be executed without user intervention.",
+  "main": "dist/index",
+  "scripts": {
+    "build": "tsc"
+  },
+  "keywords": [
+    "adobe",
+    "photoshop",
+    "animate",
+    "illustrator",
+    "indesign",
+    "bridge",
+    "pipeline",
+    "jsx",
+    "jsfl",
+    "remote",
+    "broadcast"
+  ],
+  "repository": {
+    "type": "git",
+    "url": "git+https://github.com/rkamysz/adobe-node.git"
+  },
+  "author": "Radoslaw Kamysz",
+  "license": "MIT",
+  "bugs": {
+    "url": "https://github.com/rkamysz/adobe-node/issues"
+  },
+  "homepage": "https://github.com/rkamysz/adobe-node#readme",
+  "devDependencies": {
+    "@types/node": "^12.12.5"
+  },
+  "dependencies": {
+    "@types/mkdirp-promise": "^5.0.0",
+    "mkdirp-promise": "^5.0.1",
+    "tslib": "^1.10.0"
+  }
+}
