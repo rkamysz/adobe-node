@@ -3,14 +3,9 @@ Control Adobe applications - such as Photoshop, Animate, Illustrator, InDesign -
 
 ## Installation
 
-Add package to your project eg.
-
 ```
 npm i adobe-node
 ```
-**You must have cURL installed for this module to work properly.**
-
-If you are using Windows and you do not have `cURL` installed, you can use this [link](https://curl.haxx.se/dlwiz/?type=bin) to download and install it. It is important that you can run `curl` from the command line.
 
 ## API
 
@@ -84,7 +79,7 @@ If you are using Windows and you do not have `cURL` installed, you can use this 
 ### Basic example
 
 ```
-import newAdobeApp, { AdobeAppName, AdobeAppEvent, AdobeApp, BroadcastMessage } from "adobe-node";
+import { newAdobeApp, AdobeAppName, AdobeAppEvent, AdobeApp, BroadcastMessage } from "adobe-node";
 
 const sleep = (duration: number) => new Promise(resolve => { setTimeout(resolve, duration) });
 
@@ -211,7 +206,7 @@ var ___new_document = (function() {
     } catch (e) {
       __stderr = e;
     } finally {
-      app.system("curl -d '{\"command\":\"new_document\",\"stdout\":\"" + __stdout + "\", \"stderr\":\"" + __stderr + "\" }' -H \"Content-Type: application/json\" -X POST http://localhost:5000");
+      app.system("adobe-broadcast --host='localhost' --port=5000 --msg='{\"command\":\"new_document\",\"stdout\":\"" + __stdout + "\", \"stderr\":\"" + __stderr + "\" }'");
     }
   })();
 ```
