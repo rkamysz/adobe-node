@@ -3,9 +3,12 @@ export interface AdobeApp {
   init(): void;
   on(event: string, callback: Function): AdobeApp;
   runScript(command: string, options?: Options): Promise<any>;
-  saveDocument(document: string, saveAs?: string): Promise<any>;
+  selectDocument(document: string): Promise<any>;
+  saveDocument(...documents: string[]): Promise<any>;
+  saveAsDocument(document: string, saveAs: string, options?: object): Promise<any>;
   openDocument(...documents: string[]): Promise<any>;
   closeDocument(...documents: string[]): Promise<any>;
+  saveAndCloseDocument(...documents: string[]): Promise<any>;
   newDocument(options?: NewDocumentOptions): Promise<any>
   open(): Promise<any>;
   close(): Promise<void>;
@@ -16,7 +19,9 @@ export enum AdobeAppName {
   Animate = 'animate',
   Photoshop = 'photoshop',
   Illustrator = 'illustrator',
-  InDesign = 'indesign'
+  InDesign = 'indesign',
+  Acrobat = 'acrobat',
+  AfterEffects = 'after_effects'
 }
 
 export enum AdobeAppScriptFileType {
@@ -34,7 +39,7 @@ export type Options = {
 }
 
 export type NewDocumentOptions = Options & {
-  name?: string;
+  title?: string;
   width?: number,
   height?: number
 }
@@ -67,7 +72,7 @@ export interface AdobeAppProcess {
 
 export interface CommandStack {
   push(data: AdobeScriptCommand): void;
-  resolve(command: string): void;
+  resolve(commandName: string): Promise<void>;
 }
 
 export interface AdobeScriptBuilder {
@@ -79,7 +84,7 @@ export interface AdobeScriptBuilder {
 }
 
 export interface CommandFileCreator {
-  create(command: string, options?: Options): Promise<string>;
+  create(command: string, useBuiltInScript?: boolean, options?: Options): Promise<string>;
 }
 
 export interface BroadcastBuilder {
@@ -104,6 +109,9 @@ export enum AdobeAppEvent {
   NewDocument = "new_document",
   OpenDocument = "open_document",
   CloseDocument = "close_document",
+  SaveAndCloseDocument = "save_and_close_document",
   SaveDocument = "save_document",
+  SelectDocument = "select_document",
+  SaveAsDocument = "save_as_document",
   RunScript = "run_script"
 }

@@ -5,17 +5,20 @@ const newCommandStack = (): CommandStack => {
     const stack: Map<string, AdobeScriptCommand[]> = new Map<string, AdobeScriptCommand[]>();
 
     return {
-        push: (data: AdobeScriptCommand): Promise<void> => {
+        push: (data: AdobeScriptCommand): Promise<void> => new Promise(resolve => {
             if (!stack.has(data.command)) stack.set(data.command, []);
             stack.get(data.command).push(data);
-            return Promise.resolve();
-        },
-        resolve: (command: string): Promise<void> => {
-            if (stack.has(command)) {
-                return stack.get(command).shift().resolve();
+            return resolve();
+        }),
+        resolve: (commandName: string): Promise<void> => new Promise(resolve => {
+            if (stack.has(commandName)) {
+                const command = stack.get(commandName).shift();
+                if(command) {
+                    command.resolve();
+                }
             }
-            return Promise.resolve();
-        }
+            return resolve();
+        })
     }
 };
 

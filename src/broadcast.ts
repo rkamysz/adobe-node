@@ -6,8 +6,8 @@ const broadcastMethods: Map<AdobeAppName, (cmd: string) => string> = new Map<Ado
   [AdobeAppName.Photoshop, (cmd: string) => `app.system("${cmd}");`]
 ]);
 
-const buildCurlCommand = (host: string, port: number, message: string) =>
-  `curl -d '${message}' -H \\"Content-Type: application/json\\" -X POST http://${host}:${port}`;
+const buildBroadcastCommand = (host: string, port: number, message: string) =>
+  `adobe-broadcast --host='${host}' --port=${port} --msg='${message}'`;
 
 export const newBroadcastBuilder = (config: Config): BroadcastBuilder => {
 
@@ -15,13 +15,13 @@ export const newBroadcastBuilder = (config: Config): BroadcastBuilder => {
     build(command: string) {
       const payload: string = `{\\"command\\":\\"${command}\\",\\"stdout\\":\\"" + __stdout + "\\", \\"stderr\\":\\"" + __stderr + "\\" }`;
       const broadcast: (msg: string) => string = broadcastMethods.get(config.app.name);
-      const curl: string = buildCurlCommand(config.host, config.port, payload);
-      return broadcast(curl);
+      const cmd: string = buildBroadcastCommand(config.host, config.port, payload);
+      return broadcast(cmd);
     }
   }
 }
 
 export const broadcast = (host: string, port: number, message: BroadcastMessage) => {
-  const curl: string = buildCurlCommand(host, port, JSON.stringify(message));
-  exec(curl);
+  const cmd: string = buildBroadcastCommand(host, port, JSON.stringify(message));
+  exec(cmd);
 }

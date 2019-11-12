@@ -27,10 +27,10 @@ const newAdobeScriptFileCreator = (config: Config): CommandFileCreator => {
             arg = args[name];
 
             if (arg) {
-                list.push(`var ${name}=${arg.constructor.name === "String" 
-                    ? `"${arg}"` 
-                    : arg.constructor.name === "Array"  ? `${JSON.stringify(arg)}` 
-                    : arg};`);
+                list.push(`var ${name}=${arg.constructor.name === "String"
+                    ? `"${arg}"`
+                    : arg.constructor.name === "Array" ? `${JSON.stringify(arg)}`
+                        : arg};`);
 
             } else {
                 list.push(`var ${name};`);
@@ -40,42 +40,48 @@ const newAdobeScriptFileCreator = (config: Config): CommandFileCreator => {
         return `${list.length ? list.join('\n') : ''}`
     };
 
-    const buildBody = (command: string): string => {
+    const buildBody = (command: string, useBuiltInScript: boolean): string => {
         const scriptPath: string = path.join(jsPath, appName, `${command}.js`);
+        const builtInScript: string = path.join(__dirname, '..', 'scripts', appName, `${command}.js`);
+        
+        if (useBuiltInScript && fs.existsSync(builtInScript)) {
+            console.info(`Built-in Script file found: ${builtInScript}`);
+            return fs.readFileSync(builtInScript).toString();
+        }
 
         if (fs.existsSync(scriptPath)) {
+            console.info(`Custom script file found: ${scriptPath}`);
             return fs.readFileSync(scriptPath).toString();
         }
 
-        console.info(`Script file not found: ${scriptPath}`);
         return `"";`;
     }
 
-    const buildCommandFileContent = (command: string, args?: Options): string => {
-        const variables: string = buildVars(args);
-        const body: string = buildBody(command);
-        const broadcast: string = broadcastBuilder.build(command);
-
-        return scriptBuilder
-            .setName(command)
-            .setVariables(variables)
-            .setBody(body)
-            .setBroadcast(broadcast)
-            .build();
-    }
+    const createFile = (command: string, content: string): Promise<string> => new Promise((resolve, reject) => {
+        const filePath: string = path.join(adobeScriptsPath, `${command}.${scriptingExtension.get(appName)}`);
+        mkdirp(path.dirname(filePath))
+            .then(() => {
+                fs.writeFile(filePath, content, "utf-8", (err) => {
+                    return err ? reject(err) : resolve(filePath)
+                });
+            })
+            .catch((error) => reject(error));
+    });
 
     return {
-        create: (command: string, args?: Options): Promise<string> =>
+        create: (command: string, useBuiltInScript: boolean, args?: Options): Promise<string> =>
             new Promise((resolve, reject) => {
-                const filePath: string = path.join(adobeScriptsPath, `${command}.${scriptingExtension.get(appName)}`);
-                mkdirp(path.dirname(filePath))
-                    .then(() => {
-                        let content: string = buildCommandFileContent(command, args);
-                        fs.writeFile(filePath, content, "utf-8", (err) => {
-                            return err ? reject(err) : resolve(filePath)
-                        });
-                    })
-                    .catch((error) => reject(error));
+                const variables: string = buildVars(args);
+                const body: string = buildBody(command, useBuiltInScript);
+                const broadcast: string = broadcastBuilder.build(command);
+
+                let content: string = scriptBuilder
+                    .setName(command)
+                    .setVariables(variables)
+                    .setBody(body)
+                    .setBroadcast(broadcast)
+                    .build();
+                return createFile(command, content).then(resolve).catch(reject);
             })
     }
 }

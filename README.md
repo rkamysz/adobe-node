@@ -1,6 +1,10 @@
 # adobe-node
 Control Adobe applications - such as Photoshop, Animate, Illustrator, InDesign - from node. Run JavaScript to remotely - from the command line - create, modify or export document content. This module can be used to automate the workflow by creating an action chain that can be executed without user intervention.
 
+More information about writing scripts for Adobe applications:
+- [Photoshop, Illustrator, InDesign etc. scripting center](https://www.adobe.com/devnet/scripting.html)
+- [Adobe Animate JavaScript API](https://help.adobe.com/archive/en_US/flash/cs5/flash_cs5_extending.pdf)<br/>_I suggest to save this file to disk because, it's sometimes unavailable._
+
 ## Installation
 
 ```
@@ -15,9 +19,12 @@ npm i adobe-node
 | `init` | - | Initializes the `AdobeApp` instance/ starts Adobe Event Listener.
 | `on` | event: string,<br/>callback: (message: BroadcastMessage) => void | Adds an event handler function to listen to an event so that when that event occurs, the callback will be triggered.
 | `runScript` | script: string,<br/>options?: Options | Runs custom JavaScript 
-| `saveDocument` | document: string,<br/>saveAs?: string | Saves changes made to the document. Optionally, it can save the changes as a new file
+| `selectDocument` | document: string | Brings selected document to the front of the screen.
+| `saveDocument` | ...documents: string[] | Saves changes.
+| `saveAsDocument` | document: string,<br/>saveAs: string,<br/>options: object | Saves the document in a specific format and location. Optionally you can specify the save options appropriate to the format. <br>_For more information on these options, see the script documentation for the selected Adobe product._
 | `openDocument` | ...documents: string[] | Opens documents.
 | `closeDocument` | ...documents: string[] | Closes documents.
+| `saveAndCloseDocument` | ...documents: string[] | Saves changes and closes the documents.
 | `newDocument` | options?: NewDocumentOptions | Creates document.
 | `open` | - | Opens the Adobe application.
 | `close` | - | Closes the Adobe application.
@@ -57,7 +64,7 @@ npm i adobe-node
 
 | Property | Type | Description |
 |:-------|:------------|:------------|
-|  `name` | string | Name of the document
+|  `title` | string | Name of the document
 |  `width` | number | Document width
 |  `height` | number | Document height
 |  `...` | any |  + other custom, optional properties
@@ -72,7 +79,10 @@ npm i adobe-node
 |`AdobeAppEvent.NewDocument` | - 
 |`AdobeAppEvent.OpenDocument` | -
 |`AdobeAppEvent.CloseDocument` | -
+|`AdobeAppEvent.SelectDocument` | -
 |`AdobeAppEvent.SaveDocument` | -
+|`AdobeAppEvent.SaveAsDocument` | -
+|`AdobeAppEvent.SaveAndCloseDocument` | -
 
 ## Examples
 
@@ -182,7 +192,7 @@ await app.runScript('/some_custom_script.js', {
 ```
 
 The arguments/ options used in the `runScript()` method are pasted in the `{{__vars__}}` placeholder.<br>
-These vars are also available in the `IIFE` function.
+These vars are also available in the `IIFE`.
 
 #### Generated Adobe Script
 
@@ -213,5 +223,41 @@ var ___new_document = (function() {
 
 The generated adobe scripts files - `jsx`/`jsfl` - are saved in the location specified in the `adobeScriptsPath` configuration.
 
+## To Do
+- implement more and improve built-in scripts
 
-**_Info_**: If there are no specific reasons against, it is better to use the default location of the Adobe application.
+## Changelog
+
+## 2.0.0
+### Added
+- __API__ `selectDocument()`
+- __API__ `saveAsDocument()`
+- __API__ `saveAndCloseDocument()` 
+- Build-in scripts (currently only for Photoshop and Animate)
+  - `adobe-node/scripts/photoshop|animate|illustrator|indesign|after_effects|acrobat/open_document.js`
+  - `adobe-node/scripts/photoshop|animate|illustrator|indesign|after_effects|acrobat/new_document.js`
+  - `adobe-node/scripts/photoshop|animate|illustrator|indesign|after_effects|acrobat/save_document.js`
+  - `adobe-node/scripts/photoshop|animate|illustrator|indesign|after_effects|acrobat/save_as_document.js`
+  - `adobe-node/scripts/photoshop|animate|illustrator|indesign|after_effects|acrobat/close_document.js`
+  - `adobe-node/scripts/photoshop|animate|illustrator|indesign|after_effects|acrobat/save_and_close_document.js`
+  - `adobe-node/scripts/photoshop|animate|illustrator|indesign|after_effects|acrobat/select_document.js`
+
+### Changed
+- __API__ `saveDocument()` - removed optional argument `saveAs`, saving multiple documents in one call.
+
+
+## Tips
+If any of the built-in functions does not work as you expected, you can write these functions yourself and run them via the `runScript()` method.
+
+## Contribute
+Feel free to contribute. If you have any ideas, requests just leave a message.
+
+## Info
+
+I'm not using Adobe applications, so it may happen that one of the built-in scripts does not work properly or is not optimal. I wrote it based on available resources. If you find an error or you think the script should be written in a different way. Let me know or even better implement your solution and I will add it.
+
+## License
+
+Copyright (c) 2019 Radoslaw Kamysz
+
+Licensed under the [MIT license](LICENSE).
