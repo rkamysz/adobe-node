@@ -3,7 +3,7 @@ Control Adobe applications - such as Photoshop, Animate, Illustrator, InDesign -
 
 More information about writing scripts for Adobe applications:
 - [Photoshop, Illustrator, InDesign etc. scripting center](https://www.adobe.com/devnet/scripting.html)
-- [Adobe Animate JavaScript API](https://help.adobe.com/archive/en_US/flash/cs5/flash_cs5_extending.pdf)<br/>_I suggest to save this file to disk because, it's sometimes unavailable._
+- [Adobe Animate JavaScript API](https://help.adobe.com/archive/en_US/flash/cs5/flash_cs5_extending.pdf)
 
 ## Installation
 
@@ -247,7 +247,17 @@ The generated adobe scripts files - `jsx`/`jsfl` - are saved in the location spe
 
 
 ## Tips
+
+If the Adobe application does not start, try to:
+
+* Change the access setting for the folder assigned to a variable `adobeScriptsPath`
+
+* It is also possible that you will need to change user config to enable custom scripts.
+For example, for Photoshop, add `WarnRunningScripts 0` to the `PSUserConfig.txt` file in the Photoshop settings folder and restart Photoshop.
+
 If any of the built-in functions does not work as you expected, you can write these functions yourself and run them via the `runScript()` method.
+
+
 
 ## Contribute
 Feel free to contribute. If you have any ideas, requests just leave a message.
