@@ -1,6 +1,5 @@
 import * as path from "path";
 import * as fs from "fs";
-import mkdirp = require('mkdirp-promise');
 import { AdobeAppName, AdobeAppScriptFileType, CommandFileCreator, AdobeScriptBuilder, BroadcastBuilder, Config, Options } from "./api";
 import newAdobeScriptBuilder from './script-builder';
 import { newBroadcastBuilder } from './broadcast';
@@ -59,13 +58,14 @@ const newAdobeScriptFileCreator = (config: Config): CommandFileCreator => {
 
     const createFile = (command: string, content: string): Promise<string> => new Promise((resolve, reject) => {
         const filePath: string = path.join(adobeScriptsPath, `${command}.${scriptingExtension.get(appName)}`);
-        mkdirp(path.dirname(filePath))
-            .then(() => {
-                fs.writeFile(filePath, content, "utf-8", (err) => {
-                    return err ? reject(err) : resolve(filePath)
-                });
-            })
-            .catch((error) => reject(error));
+        const fileDirname: string = path.dirname(filePath);
+        if(fs.existsSync(fileDirname)) {
+            fs.writeFile(filePath, content, "utf-8", (err) => {
+                return err ? reject(err) : resolve(filePath)
+            });
+        } else {
+            return reject(`The path (${fileDirname}) is not valid.`)
+        }
     });
 
     return {
