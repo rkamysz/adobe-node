@@ -250,7 +250,11 @@ The generated adobe scripts files - `jsx`/`jsfl` - are saved in the location spe
 
 If the Adobe application does not start, try to:
 
-* Change the access setting for the folder assigned to a variable `adobeScriptsPath`
+* Change the access/permissions settings to the directory set in the `adobeScriptsPath` param
+eg.
+```
+sudo chown <username> "/Applications/Adobe Photoshop CC 2019/Presets/Scripts/"
+```
 
 * It is also possible that you will need to change user config to enable custom scripts.
 For example, for Photoshop, add `WarnRunningScripts 0` to the `PSUserConfig.txt` file in the Photoshop settings folder and restart Photoshop.
