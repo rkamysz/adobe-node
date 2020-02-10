@@ -3,7 +3,8 @@ import { exec } from 'child_process';
 
 const broadcastMethods: Map<AdobeAppName, (cmd: string) => string> = new Map<AdobeAppName, (cmd: string) => string>([
   [AdobeAppName.Animate, (cmd: string) => `FLfile.runCommandLine("${cmd}");`],
-  [AdobeAppName.Photoshop, (cmd: string) => `app.system("${cmd}");`]
+  [AdobeAppName.Photoshop, (cmd: string) => `app.system("${cmd}");`],
+  [AdobeAppName.Illustrator, (cmd: string) => `app.system("${cmd}");`],
 ]);
 
 const buildBroadcastCommand = (host: string, port: number, message: string) =>
