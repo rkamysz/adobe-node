@@ -40,14 +40,14 @@ const newAdobeScriptFileCreator = (config: Config): CommandFileCreator => {
     };
 
     const buildBody = (command: string, useBuiltInScript: boolean): string => {
-        const scriptPath: string = path.join(jsPath, appName, `${command}.js`);
+        const scriptFilename: string = /[-_\w]+[.][\w]+$/.test(command) ? command : `${command}.js`;
+        const scriptPath: string = path.join(jsPath, scriptFilename);
         const builtInScript: string = path.join(__dirname, '..', 'scripts', appName, `${command}.js`);
-        
+
         if (useBuiltInScript && fs.existsSync(builtInScript)) {
             console.info(`Built-in Script file found: ${builtInScript}`);
             return fs.readFileSync(builtInScript).toString();
         }
-
         if (fs.existsSync(scriptPath)) {
             console.info(`Custom script file found: ${scriptPath}`);
             return fs.readFileSync(scriptPath).toString();
@@ -56,8 +56,8 @@ const newAdobeScriptFileCreator = (config: Config): CommandFileCreator => {
         return `"";`;
     }
 
-    const createFile = (command: string, content: string): Promise<string> => new Promise((resolve, reject) => {
-        const filePath: string = path.join(adobeScriptsPath, `${command}.${scriptingExtension.get(appName)}`);
+    const createFile = (commandName: string, content: string): Promise<string> => new Promise((resolve, reject) => {
+        const filePath: string = path.join(adobeScriptsPath, `${commandName}.${scriptingExtension.get(appName)}`);
         const fileDirname: string = path.dirname(filePath);
         if(fs.existsSync(fileDirname)) {
             fs.writeFile(filePath, content, "utf-8", (err) => {
@@ -71,17 +71,18 @@ const newAdobeScriptFileCreator = (config: Config): CommandFileCreator => {
     return {
         create: (command: string, useBuiltInScript: boolean, args?: Options): Promise<string> =>
             new Promise((resolve, reject) => {
+                const commandName: string = path.basename(command).replace(/\.\w+$/,'');
                 const variables: string = buildVars(args);
                 const body: string = buildBody(command, useBuiltInScript);
-                const broadcast: string = broadcastBuilder.build(command);
+                const broadcast: string = broadcastBuilder.build(commandName);
 
                 let content: string = scriptBuilder
-                    .setName(command)
+                    .setName(commandName)
                     .setVariables(variables)
                     .setBody(body)
                     .setBroadcast(broadcast)
                     .build();
-                return createFile(command, content).then(resolve).catch(reject);
+                return createFile(commandName, content).then(resolve).catch(reject);
             })
     }
 }
