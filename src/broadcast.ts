@@ -5,6 +5,7 @@ const broadcastMethods: Map<AdobeAppName, (cmd: string) => string> = new Map<Ado
   [AdobeAppName.Animate, (cmd: string) => `FLfile.runCommandLine("${cmd}");`],
   [AdobeAppName.Photoshop, (cmd: string) => `app.system("${cmd}");`],
   [AdobeAppName.Illustrator, (cmd: string) => `app.system("${cmd}");`],
+  [AdobeAppName.InDesign, (cmd: string) => `app.system("${cmd}");`],
 ]);
 
 const buildBroadcastCommand = (host: string, port: number, message: string) =>
