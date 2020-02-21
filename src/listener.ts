@@ -2,26 +2,29 @@ import { AdobeEventListener, BroadcastMessage } from './api';
 import { Socket, Server, createServer } from 'net';
 
 const newAdobeAppListener = (host: string, port: number, callback: (commandName: string) => void): AdobeEventListener => {
-  
+
   const callbacks: Map<string, Function> = new Map<string, Function>();
   let server: Server;
-  let client:Socket;
+  let client: Socket;
 
   function connectionListener(socket: Socket) {
     client = socket;
     socket.on('data', (buffer: Buffer) => {
-      const data: BroadcastMessage = JSON.parse(buffer.toString());
-      
-      if (callbacks.has(data.command)) {
-        callbacks.get(data.command)(data.stdout, data.stderr);
+      try {
+        const dataString = buffer.toString();
+        const data: any = JSON.parse(dataString);
+        if (callbacks.has(data.command)) {
+          callbacks.get(data.command)(data.stdout, data.stderr);
+        }
+        callback(data.command);
+      } catch (error) {
+        console.error("Failed to convert data: " + error);
       }
-
-      callback(data.command);
     });
   }
 
   function disposeServer() {
-    if(client) {
+    if (client) {
       client.end();
     }
     server = null;
