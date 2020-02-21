@@ -10,9 +10,8 @@ var ___{{__command__}} = (function() {
       __stdout = {{__fn__}}
     } catch (e) {
       __stderr = e;
-    } finally {
-      {{__broadcast__}}
-    }
+    } 
+    {{__broadcast__}}
   })();`;
 
 const newAdobeScriptBuilder = (): AdobeScriptBuilder => {
