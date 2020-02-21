@@ -14,7 +14,8 @@ const newAdobeAppListener = (host: string, port: number, callback: (commandName:
         const dataString = buffer.toString();
         const data: any = JSON.parse(dataString);
         if (callbacks.has(data.command)) {
-          callbacks.get(data.command)(data.stdout, data.stderr);
+          const callback = callbacks.get(data.command);
+          callback(data.stdout, data.stderr);
         }
         callback(data.command);
       } catch (error) {

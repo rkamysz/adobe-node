@@ -5,11 +5,17 @@ const broadcastMethods: Map<AdobeAppName, (cmd: string, payload: string) => stri
   [AdobeAppName.Animate, (cmd: string, payload: string) => `FLfile.runCommandLine("${cmd}");`],
   [AdobeAppName.Photoshop, (cmd: string, payload: string) => `app.system("${cmd}");`],
   [AdobeAppName.Illustrator, (cmd: string, command: string) => `
+  if (!__stdout) {
+    __stdout = "{}";
+  }
+  if (!__stderr) {
+    __stderr = "";
+  }
   const bt = new BridgeTalk();
   bt.target = 'bridge';
   const btCmd = '${cmd.replace(/'/g, "\\'")}';
   bt.body = 'const cmd = "' + btCmd + '";';
-  bt.body += 'const msg = \\\'{"command": "${command}", "stdout": "' + __stdout + '", "stderr": "' + __stderr + '"}\\\';';
+  bt.body += 'const msg = \\\'{"command": "${command}", "stdout": ' + __stdout + ', "stderr": "' + __stderr + '"}\\\';';
   bt.body += 'const sys = cmd + " --msg=\\\'" + msg + "\\\'";';
   bt.body += 'app.system(sys);';
   bt.onError = function(bt)  
