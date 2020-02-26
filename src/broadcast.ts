@@ -20,10 +20,9 @@ const broadcastMethods: Map<AdobeAppName, (cmd: string, payload: string) => stri
   bt.body += 'app.system(sys);';
   bt.onError = function(bt)  
   {  
-    alert(bt.body); 
+    alert("Error from BridgeTalk: " + bt.body); 
   };
   bt.send();
-  alert(bt.body);
   `]
 ]);
 
