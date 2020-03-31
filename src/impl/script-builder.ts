@@ -1,4 +1,4 @@
-import { AdobeScriptBuilder } from './api';
+import { AdobeScriptBuilder } from '../api';
 
 const commandTemplate: string = `
 var ___{{__command__}} = (function() {

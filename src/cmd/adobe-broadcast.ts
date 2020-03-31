@@ -1,8 +1,8 @@
 #!/usr/bin/env node
 
-import { createConnection, connect, Socket } from "net";
+import { connect, Socket } from "net";
 import * as minimist from 'minimist';
-import defaults from './defaults';
+import defaults from '../impl/defaults';
 
 const args = minimist(process.argv.slice(2));
 

@@ -1,9 +1,10 @@
 import * as os from "os";
 import { exec, ChildProcess, execFile, ExecException } from "child_process";
-import { AdobeProcessOptions, AdobeAppProcess } from "./api";
+import { AdobeProcessOptions, AdobeAppProcess, Config, AdobeAppEvent } from "../api";
 import { existsSync } from 'fs';
+import { buildBroadcastCommand } from './broadcast';
 
-const newAdobeAppProcess = (appPath: string, closeCallback: Function, options?: AdobeProcessOptions): AdobeAppProcess => {
+const newAdobeAppProcess = ({app: { path: appPath }, host, port}: Config, options?: AdobeProcessOptions): AdobeAppProcess => {
   let process: ChildProcess;
   const timeoutCallback: Function = options.timeoutCallback;
   const processTimeout: number = options.timeout || 0;
@@ -14,7 +15,7 @@ const newAdobeAppProcess = (appPath: string, closeCallback: Function, options?: 
     if (becauseOfTimeout && timeoutCallback) {
       timeoutCallback(error);
     } else {
-      closeCallback(stdout);
+      exec(buildBroadcastCommand(host, port, AdobeAppEvent.CloseApp, true, true).replace(/\\/g,''));
     }
   };
 

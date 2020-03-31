@@ -1,9 +1,10 @@
 import * as path from "path";
 import * as fs from "fs";
-import { AdobeAppName, AdobeAppScriptFileType, CommandFileCreator, AdobeScriptBuilder, BroadcastBuilder, Config, Options } from "./api";
+import { AdobeAppName, AdobeAppScriptFileType, CommandFileCreator, AdobeScriptBuilder, Config, Options } from "../api";
 import newAdobeScriptBuilder from './script-builder';
-import { newBroadcastBuilder } from './broadcast';
 import defaults from './defaults';
+import { buildAnimateBroadcastScript } from './animate-broadcast-script';
+import { buildBridgeTalkBroadcastScript } from './bridge-talk-broadcast-script';
 
 const scriptingExtension: Map<AdobeAppName, AdobeAppScriptFileType> = new Map<AdobeAppName, AdobeAppScriptFileType>([
     [AdobeAppName.Animate, AdobeAppScriptFileType.Jsfl],
@@ -17,7 +18,6 @@ const newAdobeScriptFileCreator = (config: Config): CommandFileCreator => {
     const jsPath: string = config.jsPath || defaults.scriptsPath;
     const adobeScriptsPath: string = config.app.adobeScriptsPath || defaults.adobeScriptsPath;
     const scriptBuilder: AdobeScriptBuilder = newAdobeScriptBuilder();
-    const broadcastBuilder: BroadcastBuilder = newBroadcastBuilder(config);
 
     const buildVars = (args: any): string => {
         let list: string[] = [];
@@ -68,12 +68,20 @@ const newAdobeScriptFileCreator = (config: Config): CommandFileCreator => {
         }
     });
 
+    const buildBroadcastScript = (command: string) => {
+        const {host, port} = config;
+        if (appName === AdobeAppName.Animate) {
+            return buildAnimateBroadcastScript(host, port, command);
+        }
+        return buildBridgeTalkBroadcastScript(host, port, command)
+    }
+
     return {
         create: (command: string, useBuiltInScript: boolean, args?: Options): Promise<string> =>
             new Promise((resolve, reject) => {
                 const variables: string = buildVars(args);
                 const body: string = buildBody(command, useBuiltInScript);
-                const broadcast: string = broadcastBuilder.build(command);
+                const broadcast: string = buildBroadcastScript(command);
 
                 let content: string = scriptBuilder
                     .setName(command)

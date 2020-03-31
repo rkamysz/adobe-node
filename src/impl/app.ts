@@ -1,31 +1,26 @@
 
 
-import { AdobeAppEvent, AdobeAppProcess, CommandFileCreator as AdobeScriptCreator, CommandStack, Config, NewDocumentOptions, Options, AdobeApp, AdobeEventListener } from "./api";
+import { AdobeAppEvent, AdobeAppProcess, CommandFileCreator as AdobeScriptCreator, CommandStack, Config, NewDocumentOptions, Options, AdobeApp, AdobeEventListener } from "../api";
 import newAdobeAppListener from './listener';
 import newAdobeAppProcess from './process';
 import newCommandStack from './commands';
 import newAdobeScriptCreator from './script-file-creator';
-import { broadcast } from './broadcast';
 
 export const newAdobeApp = (config: Config, timeoutCallback?: Function): AdobeApp => {
 
   const scriptCreator: AdobeScriptCreator = newAdobeScriptCreator(config);
   const commandStack: CommandStack = newCommandStack();
   const eventListener: AdobeEventListener = newAdobeAppListener(config.host, config.port, eventListenerCallback);
-  const appProcess: AdobeAppProcess = newAdobeAppProcess(config.app.path, appCloseCallback, {
+  const appProcess: AdobeAppProcess = newAdobeAppProcess(config, {
     timeout: config.appTimeout,
     timeoutCallback
   });
 
-  function eventListenerCallback(commandName: string) {
-    commandStack.resolve(commandName);
+  async function eventListenerCallback(commandName: string) {
+    await commandStack.resolve(commandName);
   }
 
-  function appCloseCallback() {
-    broadcast(config.host, config.port, { command: AdobeAppEvent.CloseApp });
-  }
-
-  function useBuiltInScript(command: string): boolean {
+  function isBuiltInCommand(command: string): boolean {
     return command === AdobeAppEvent.CloseDocument 
       || command === AdobeAppEvent.SaveDocument
       || command === AdobeAppEvent.SaveAndCloseDocument
@@ -46,7 +41,7 @@ export const newAdobeApp = (config: Config, timeoutCallback?: Function): AdobeAp
 
     runScript: (command: string, options?: Options): Promise<any> =>
       new Promise(async (resolve, reject) => {
-        const commandPath: string = await scriptCreator.create(command, useBuiltInScript(command), options);
+        const commandPath: string = await scriptCreator.create(command, isBuiltInCommand(command), options);
         commandStack.push({ command, resolve, reject });
         appProcess.run(commandPath);
       }),

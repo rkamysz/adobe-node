@@ -87,10 +87,6 @@ export interface CommandFileCreator {
   create(command: string, useBuiltInScript?: boolean, options?: Options): Promise<string>;
 }
 
-export interface BroadcastBuilder {
-  build(command: string): string;
-}
-
 export interface BroadcastMessage {
   command: string;
   stdout?: string;
