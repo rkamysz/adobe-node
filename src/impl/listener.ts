@@ -11,7 +11,10 @@ const newAdobeAppListener = (host: string, port: number, callback: (commandName:
     client = socket;
     socket.on('data', (buffer: Buffer) => {
         const data: BroadcastMessage = JSON.parse(buffer.toString());
-        callbacks.get(data.command)(data.stdout, data.stderr);
+        const eventCallback: Function = callbacks.get(data.command);
+        if(eventCallback) {
+          callbacks.get(data.command)(data.stdout, data.stderr);
+        }
         callback(data.command);
     });
   }

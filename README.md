@@ -226,26 +226,6 @@ The generated adobe scripts files - `jsx`/`jsfl` - are saved in the location spe
 ## To Do
 - implement more and improve built-in scripts
 
-## Changelog
-
-## 2.0.0
-### Added
-- __API__ `selectDocument()`
-- __API__ `saveAsDocument()`
-- __API__ `saveAndCloseDocument()` 
-- Build-in scripts (currently only for Photoshop and Animate)
-  - `adobe-node/scripts/photoshop|animate|illustrator|indesign|after_effects|acrobat/open_document.js`
-  - `adobe-node/scripts/photoshop|animate|illustrator|indesign|after_effects|acrobat/new_document.js`
-  - `adobe-node/scripts/photoshop|animate|illustrator|indesign|after_effects|acrobat/save_document.js`
-  - `adobe-node/scripts/photoshop|animate|illustrator|indesign|after_effects|acrobat/save_as_document.js`
-  - `adobe-node/scripts/photoshop|animate|illustrator|indesign|after_effects|acrobat/close_document.js`
-  - `adobe-node/scripts/photoshop|animate|illustrator|indesign|after_effects|acrobat/save_and_close_document.js`
-  - `adobe-node/scripts/photoshop|animate|illustrator|indesign|after_effects|acrobat/select_document.js`
-
-### Changed
-- __API__ `saveDocument()` - removed optional argument `saveAs`, saving multiple documents in one call.
-
-
 ## Tips
 
 If the Adobe application does not start, try to:

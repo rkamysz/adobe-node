@@ -2,7 +2,7 @@
 export interface AdobeApp {
   init(): void;
   on(event: string, callback: Function): AdobeApp;
-  runScript(command: string, options?: Options): Promise<any>;
+  runScript(path: string, options?: Options): Promise<any>;
   selectDocument(document: string): Promise<any>;
   saveDocument(...documents: string[]): Promise<any>;
   saveAsDocument(document: string, saveAs: string, options?: object): Promise<any>;
@@ -77,14 +77,14 @@ export interface CommandStack {
 
 export interface AdobeScriptBuilder {
   setName(value: string): AdobeScriptBuilder;
-  setVariables(value: string): AdobeScriptBuilder;
+  setVariables(args: any): AdobeScriptBuilder;
   setBody(value: string): AdobeScriptBuilder;
   setBroadcast(value: string): AdobeScriptBuilder;
   build(): string;
 }
 
-export interface CommandFileCreator {
-  create(command: string, useBuiltInScript?: boolean, options?: Options): Promise<string>;
+export interface AdobeScriptCreator {
+  create(command: string, body?: string, options?: Options): Promise<string>;
 }
 
 export interface BroadcastMessage {
@@ -97,6 +97,11 @@ export interface AdobeScriptCommand {
   command: string;
   resolve: Function;
   reject: Function;
+}
+
+export interface ScriptReader {
+  readBuiltInScript(command: string): string;
+  readCustomScript(scriptPath: string): string;
 }
 
 export enum AdobeAppEvent {

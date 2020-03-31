@@ -1,34 +1,32 @@
-
-
-import { AdobeAppEvent, AdobeAppProcess, CommandFileCreator as AdobeScriptCreator, CommandStack, Config, NewDocumentOptions, Options, AdobeApp, AdobeEventListener } from "../api";
+import * as path from "path";
+import { AdobeAppEvent, AdobeAppProcess, AdobeScriptCreator, CommandStack, Config, NewDocumentOptions, Options, AdobeApp, AdobeEventListener, ScriptReader } from "../api";
 import newAdobeAppListener from './listener';
 import newAdobeAppProcess from './process';
 import newCommandStack from './commands';
 import newAdobeScriptCreator from './script-file-creator';
+import { newScriptReader } from './script-reader';
 
 export const newAdobeApp = (config: Config, timeoutCallback?: Function): AdobeApp => {
-
+  const scriptReader: ScriptReader = newScriptReader(config);
   const scriptCreator: AdobeScriptCreator = newAdobeScriptCreator(config);
   const commandStack: CommandStack = newCommandStack();
-  const eventListener: AdobeEventListener = newAdobeAppListener(config.host, config.port, eventListenerCallback);
   const appProcess: AdobeAppProcess = newAdobeAppProcess(config, {
     timeout: config.appTimeout,
     timeoutCallback
   });
+  const eventListener: AdobeEventListener = newAdobeAppListener(
+    config.host, 
+    config.port, 
+    async (commandName: string) => {
+      await commandStack.resolve(commandName);
+  });
 
-  async function eventListenerCallback(commandName: string) {
-    await commandStack.resolve(commandName);
-  }
-
-  function isBuiltInCommand(command: string): boolean {
-    return command === AdobeAppEvent.CloseDocument 
-      || command === AdobeAppEvent.SaveDocument
-      || command === AdobeAppEvent.SaveAndCloseDocument
-      || command === AdobeAppEvent.SaveAsDocument
-      || command === AdobeAppEvent.OpenDocument
-      || command === AdobeAppEvent.NewDocument
-      || command === AdobeAppEvent.SelectDocument;
-  }
+  const createScript = (command: string, body: string, options?: Options): Promise<any> =>
+      new Promise(async (resolve, reject) => {
+        const commandPath: string = await scriptCreator.create(command, body, options);
+        commandStack.push({ command, resolve, reject });
+        appProcess.run(commandPath);
+      })
 
   const app: AdobeApp = {
     init() {
@@ -39,33 +37,46 @@ export const newAdobeApp = (config: Config, timeoutCallback?: Function): AdobeAp
       return app;
     },
 
-    runScript: (command: string, options?: Options): Promise<any> =>
-      new Promise(async (resolve, reject) => {
-        const commandPath: string = await scriptCreator.create(command, isBuiltInCommand(command), options);
-        commandStack.push({ command, resolve, reject });
-        appProcess.run(commandPath);
-      }),
+    runScript: (scriptPath: string, options?: Options): Promise<any> => {
+      const body: string = scriptReader.readCustomScript(scriptPath);
+      const command: string = path.basename(scriptPath).split('.').shift();
+      return createScript(command, body, options)
+    },
 
-    saveDocument: (...documents: string[]): Promise<any> =>
-      app.runScript(AdobeAppEvent.SaveDocument, { documents }),
+    saveDocument: (...documents: string[]): Promise<any> => {
+      const body: string = scriptReader.readBuiltInScript(AdobeAppEvent.SaveDocument);
+      return createScript(AdobeAppEvent.SaveDocument, body, { documents })
+    },
     
-    selectDocument: (document: string): Promise<any> =>
-      app.runScript(AdobeAppEvent.SelectDocument, { document }),
+    selectDocument: (document: string): Promise<any> => {
+      const body: string = scriptReader.readBuiltInScript(AdobeAppEvent.SelectDocument);
+      return createScript(AdobeAppEvent.SelectDocument, body, { document })
+    },
 
-    saveAsDocument: (document: string, saveAs: string, options?: object): Promise<any> =>
-      app.runScript(AdobeAppEvent.SaveAsDocument, { document, saveAs, options }),
+    saveAsDocument: (document: string, saveAs: string, options?: object): Promise<any> => {
+      const body: string = scriptReader.readBuiltInScript(AdobeAppEvent.SaveAsDocument);
+      return createScript(AdobeAppEvent.SaveAsDocument, body, { document, saveAs, options })
+    },
 
-    openDocument: (...documents: string[]): Promise<any> =>
-      app.runScript(AdobeAppEvent.OpenDocument, { documents }),
+    openDocument: (...documents: string[]): Promise<any> => {
+      const body: string = scriptReader.readBuiltInScript(AdobeAppEvent.OpenDocument);
+      return createScript(AdobeAppEvent.OpenDocument, body, { documents })
+    },
 
-    closeDocument: (...documents: string[]): Promise<any> =>
-      app.runScript(AdobeAppEvent.CloseDocument, { documents }),
+    closeDocument: (...documents: string[]): Promise<any> => {
+      const body: string = scriptReader.readBuiltInScript(AdobeAppEvent.CloseDocument);
+      return createScript(AdobeAppEvent.CloseDocument, body, { documents })
+    },
 
-    saveAndCloseDocument: (...documents: string[]): Promise<any> =>
-      app.runScript(AdobeAppEvent.SaveAndCloseDocument, { documents }),
+    saveAndCloseDocument: (...documents: string[]): Promise<any> => {
+      const body: string = scriptReader.readBuiltInScript(AdobeAppEvent.SaveAndCloseDocument);
+      return createScript(AdobeAppEvent.SaveAndCloseDocument, body, { documents })
+    },
 
-    newDocument: (options?: NewDocumentOptions): Promise<any> =>
-      app.runScript(AdobeAppEvent.NewDocument, options),
+    newDocument: (options?: NewDocumentOptions): Promise<any> => {
+      const body: string = scriptReader.readBuiltInScript(AdobeAppEvent.NewDocument);
+      return createScript(AdobeAppEvent.NewDocument, body, options)
+    },
 
     open: (): Promise<any> => new Promise(async (resolve, reject) => {
       const scriptPath = await scriptCreator.create(AdobeAppEvent.OpenApp)
